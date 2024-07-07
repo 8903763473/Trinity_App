@@ -5,6 +5,8 @@ import Faq from "../model/FAQ.js";
 import bcrypt from "bcrypt";
 import "dotenv/config";
 import profileModel from "../model/candidate_profileModel.js";
+import questionModel from "../model/questionModel.js";
+import submitModel from "../model/submitModel.js";
 const Candidateservice = {
   signup: async (data) => {
     try {
@@ -113,7 +115,7 @@ const Candidateservice = {
     }
   },
   // =================================
-  Updateprofile:async (data) => {
+  Updateprofile: async (data) => {
     const {
       candidateProfile_id,
       profile_img,
@@ -125,21 +127,111 @@ const Candidateservice = {
     } = data;
 
     try {
-      const Updateprofile = await profileModel.findOneAndUpdate(candidateProfile_id,{
-     profile_img,
+      const Updateprofile = await profileModel.findOneAndUpdate(candidateProfile_id, {
+        profile_img,
         skills,
         description,
         expirence,
         projects,
         resume,
       });
-console.log("sucessfully updated")
+      console.log("sucessfully updated")
       return Updateprofile;
     } catch (error) {
       throw error;
     }
   },
-  // =========================================
+
+  // ==========================
+  questionUpload: async (data) => {
+    const { level, language, question, options, answer } = data;
+
+    try {
+      const questionUpload = await questionModel.create({
+        level,
+        language,
+        question,
+        options,
+        answer
+      });
+      console.log("Successfully stored");
+      return questionUpload;
+    } catch (error) {
+      throw error;
+    }
+  },
+
+
+  // ================================
+  getquestion: async (data) => {
+    const {
+      level,
+      language } = data;
+    try {
+      const questions = await questionModel.aggregate([
+        { $match: { level, language } },
+        { $sample: { size: 20 } },
+        { $project: { question: 1, options: 1, _id: 0 } }
+      ]);
+      console.log("sucessfully ");
+      return questions;
+    } catch (error) {
+      throw error;
+    }
+  },
+
+  // ====================================
+  submitAnswer: async (data) => {
+    const {  candidate_id, answers } = data;
+
+    try {
+      const submitAnswer = await submitModel.create({
+        candidate_id,
+        answers,
+       
+      });
+      console.log("Successfully stored");
+      return submitAnswer;
+    } catch (error) {
+      throw error;
+    }
+  },
+
+
+
+  // ================================
+  validate: async (data) => {
+    const { question_id, providedAnswer } = data;
+
+    try {
+      const question = await questionModel.findById(question_id).select('answer');
+
+      if (!question) {
+        throw new Error('Question not found');
+      }
+
+      const isCorrect = question.answer === providedAnswer;
+      console.log(`Answer validation ${isCorrect ? 'successful' : 'failed'}`);
+
+
+      const totalQuestions = 1;
+      const score = isCorrect ? 1 : 0;
+      const pass = score >= 1;
+      console.log(isCorrect,
+        score,
+        pass);
+      return {
+        isCorrect,
+        score,
+        pass
+      };
+    } catch (error) {
+      throw error;
+    }
+  },
+
+
+  // =========================================\
   faq: async (data) => {
     const { question, answer } = data;
 

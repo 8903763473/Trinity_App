@@ -42,7 +42,7 @@ const Candidatecontroller = {
   },
   // =====================================
   Updateprofile:async (req, res, next) => {
-    const { name,profile_img,skills,description ,expirence ,projects,resume} = req.body;
+    const { profile_img,skills,description ,expirence ,projects,resume} = req.body;
     try {
       const Updateprofile = await Candidateservice.Updateprofile(req.body);
       res.json(Updateprofile);
@@ -54,6 +54,60 @@ const Candidatecontroller = {
     }
   },
 
+  // =====================================
+  questionUpload:async (req, res, next) => {
+    const { level,language,question,options ,answer} = req.body;
+    try {
+      const questionUpload = await Candidateservice.questionUpload(req.body);
+      res.json(questionUpload);
+    } catch (error) {
+      error.message = error.error;
+      console.log(error);
+      error.statuscode = 500;
+      next(error);
+    }
+  },
+
+  getquestion:async (req, res, next) => {
+    const { level,language } = req.body;
+    try {
+      const getquestion = await Candidateservice.getquestion(req.body);
+      res.json(getquestion);
+    } catch (error) {
+      error.message = error.error;
+      console.log(error);
+      error.statuscode = 500;
+      next(error);
+    }
+  },
+
+
+  submitAnswer:async (req, res, next) => {
+    const {candidate_id  , answers} = req.body;
+    try {
+      const submitAnswer = await Candidateservice.submitAnswer(req.body);
+      res.json(submitAnswer);
+    } catch (error) {
+      error.message = error.error;
+      console.log(error);
+      error.statuscode = 500;
+      next(error);
+    }
+  },
+
+
+  validate:async (req, res, next) => {
+    const { question_id, Answer} = req.body;
+    try {
+      const validate = await Candidateservice.validate(req.body);
+      res.json(validate);
+    } catch (error) {
+      error.message = error.error;
+      console.log(error);
+      error.statuscode = 500;
+      next(error);
+    }
+  },
   // ==============================
   faq: async (req, res, next) => {
     const { question, answer } = req.body;
